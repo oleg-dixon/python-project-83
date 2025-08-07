@@ -5,6 +5,9 @@ description = "Website Analyzer"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "flask>=3.1.1",
     "ruff>=0.12.7",
+    "gunicorn>=23.0.0",
+    "python-dotenv>=1.1.1",
 ]
 
