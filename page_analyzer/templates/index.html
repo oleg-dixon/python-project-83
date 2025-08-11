@@ -1,0 +1,18 @@
+
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <h1 class="text-center mb-4">Анализатор страниц</h1>
+        <p class="text-center mb-4">Бесплатно проверяйте сайты на SEO-пригодность</p>
+        
+        <form action="{{ url_for('add_url') }}" method="post" class="mt-4">
+            <div class="input-group mb-3">
+                <input type="text" name="url" class="form-control form-control-lg" 
+                       placeholder="https://www.example.com" required>
+                <button class="btn btn-primary btn-lg" type="submit">Проверить</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
