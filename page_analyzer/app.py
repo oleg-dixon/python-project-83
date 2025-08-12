@@ -189,7 +189,15 @@ def check_url(id):
         logger.error(f"Ошибка БД при проверке URL: {str(e)}")
         flash('Ошибка при сохранении результатов проверки', 'danger')
         return redirect(url_for('url_detail', id=id))
-    
+
+
+@app.template_filter('strftime')
+def format_datetime(value, format='%Y-%m-%d'):
+    """Фильтр для форматирования даты в шаблонах"""
+    if value is None:
+        return ''
+    return value.strftime(format)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
