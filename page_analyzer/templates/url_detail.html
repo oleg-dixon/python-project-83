@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h1 class="mb-4">Сайт: {{ url.name }}</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Код ответа</th>
+                        <th>h1</th>
+                        <th>title</th>
+                        <th>description</th>
+                        <th>Дата создания</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for check in checks %}
+                    <tr>
+                        <td>{{ check.id }}</td>
+                        <td>{{ check.status_code }}</td>
+                        <td>{{ check.h1|truncate(50) if check.h1 }}</td>
+                        <td>{{ check.title|truncate(50) if check.title }}</td>
+                        <td>{{ check.description|truncate(50) if check.description }}</td>
+                        <td>{{ check.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <form action="{{ url_for('check_url', id=url.id) }}" method="post">
+            <button type="submit" class="btn btn-primary">Запустить проверку</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
