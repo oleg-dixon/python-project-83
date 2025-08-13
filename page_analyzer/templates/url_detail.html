@@ -1,48 +1,60 @@
 {% extends 'base.html' %}
 
+{% block title %}Детали сайта{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col">
-        <h1 class="mb-4">Сайт: {{ url.name }}</h1>
-    </div>
-</div>
+<div class="container mt-5">
+    <h1 class="mb-4">Сайт: {{ url.name }}</h1>
 
-<div class="row">
-    <div class="col">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Код ответа</th>
-                        <th>h1</th>
-                        <th>title</th>
-                        <th>description</th>
-                        <th>Дата создания</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for check in checks %}
-                    <tr>
-                        <td>{{ check.id }}</td>
-                        <td>{{ check.status_code }}</td>
-                        <td>{{ check.h1|truncate(50) if check.h1 }}</td>
-                        <td>{{ check.title|truncate(50) if check.title }}</td>
-                        <td>{{ check.description|truncate(50) if check.description }}</td>
-                        <td>{{ check.created_at.strftime('%Y-%m-%d') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th scope="row">ID</th>
+                <td>{{ url.id }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Имя</th>
+                <td>{{ url.name }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Дата создания</th>
+                <td>{{ url.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-<div class="row">
-    <div class="col">
-        <form action="{{ url_for('check_url', id=url.id) }}" method="post">
-            <button type="submit" class="btn btn-primary">Запустить проверку</button>
-        </form>
-    </div>
+    <form action="{{ url_for('check_url', id=url.id) }}" method="post" class="mb-4">
+    <button type="submit" class="btn btn-primary">Запустить проверку</button>
+    </form>
+
+    <h2>Проверки</h2>
+    <table class="table table-bordered table-hover mt-2" data-test="checks">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Код ответа</th>
+                <th>h1</th>
+                <th>title</th>
+                <th>description</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for check in checks %}
+            <tr>
+                <td>{{ check.id }}</td>
+                <td>{{ check.status_code }}</td>
+                <td>{{ check.h1 or '' }}</td>
+                <td>{{ check.title or '' }}</td>
+                <td>{{ check.description or '' }}</td>
+                <td>{{ check.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">Проверок пока нет</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

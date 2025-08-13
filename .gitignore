@@ -8,4 +8,4 @@ dist/
 .ruff_cache
 .env
 TODO.md
-app.log
+py_log.log
