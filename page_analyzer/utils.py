@@ -1,6 +1,7 @@
 import logging
 import requests
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 import psycopg2
 from flask import (
@@ -9,10 +10,10 @@ from flask import (
     url_for,
 )
 from validators.url import url as is_url
-
 from page_analyzer import db
+from page_analyzer.logger import setup_logging
 
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
     
 def get_urls():
@@ -39,10 +40,10 @@ def get_urls():
                         created_at
                     FROM url_checks
                     WHERE url_id = u.id
-                    ORDER BY created_at DESC
+                    ORDER BY created_at ASC
                     LIMIT 1
                 ) uc ON true
-                ORDER BY u.id DESC
+                ORDER BY u.id ASC
             """)
             return cur.fetchall()
 
@@ -71,10 +72,16 @@ def get_url_detail(id):
                 return None
             
             cur.execute("""
-                SELECT id, status_code, created_at 
+                SELECT 
+                    id,
+                    status_code,
+                    h1,
+                    title,
+                    description,
+                    created_at 
                 FROM url_checks 
                 WHERE url_id = %s 
-                ORDER BY id ASC
+                ORDER BY id DESC
             """, (id,))
             checks = cur.fetchall()
             
@@ -154,11 +161,52 @@ def check_urls(url_id):
                 response.raise_for_status()
                 status_code = response.status_code
                 
+                soup = BeautifulSoup(response.text, features='lxml')
+
+                title_tag = soup.find('title')
+                if title_tag and title_tag.get_text(strip=True):
+                    title_tag_text = title_tag.get_text(strip=True)
+                else:
+                    logger.warning("The <title> tag was not found on the URL")
+                    flash('Тег <title> не найден на странице')
+                    title_tag_text = None
+
+                h1_tag = soup.find("h1")
+                if h1_tag and h1_tag.get_text(strip=True):
+                    h1_tag_text = h1_tag.get_text(strip=True)
+                else:
+                    logger.warning("The <h1> tag was not found on the URL")
+                    flash('Тег <h1> не найден на странице')
+                    h1_tag_text = None
+
+                meta_tag = soup.find('meta', attrs={"name": "description"})
+                if meta_tag and meta_tag.get('content'):
+                    content = meta_tag.get('content')
+                else:
+                    logger.warning(
+                        f"The <meta> tag with 'name=description'" 
+                        f"was not found on the URL"
+                    )
+                    flash("Тег <meta> с 'name=description' не найден на странице")
+                    content = None
+
                 cur.execute("""
                     INSERT INTO url_checks 
-                    (url_id, status_code, created_at)
-                    VALUES (%s, %s, %s)
-                """, (url_id, status_code, datetime.now()))
+                    (url_id,
+                    status_code,
+                    h1,
+                    title,
+                    description,
+                    created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    url_id,
+                    status_code,
+                    h1_tag_text,
+                    title_tag_text,
+                    content,
+                    datetime.now())
+                )
                 
                 logger.info(f"Verification for URL {url_id} saved successfully")
                 return {'status': 'success'}

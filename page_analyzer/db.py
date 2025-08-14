@@ -5,8 +5,9 @@ from contextlib import contextmanager
 import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import DictCursor
+from page_analyzer.logger import setup_logging
 
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')

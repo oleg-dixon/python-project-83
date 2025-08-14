@@ -1,4 +1,5 @@
 import os
+import logging
 
 from dotenv import load_dotenv
 from flask import (
@@ -11,6 +12,9 @@ from flask import (
 )
 
 from page_analyzer import utils
+from page_analyzer.logger import setup_logging
+
+logger = setup_logging()
 
 load_dotenv()
 
@@ -39,14 +43,18 @@ def urls():
 
 @app.route('/urls/<int:id>')
 def url_detail(id):
-    """Обработчик для детальной информацией о URL"""
+    """Обработчик для детальной информации о URL"""
     url_data = utils.get_url_detail(id)
     if not url_data:
         flash('Страница не найдена', 'danger')
         return redirect(url_for('index'))
     
     url, checks = url_data
-    return render_template('url_detail.html', url=url, checks=checks)
+    return render_template(
+        'url_detail.html',
+        url=url,
+        checks=checks
+        )
     
 
 @app.route('/add', methods=['POST'])
