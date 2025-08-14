@@ -1,4 +1,5 @@
 import logging
+import requests
 from datetime import datetime
 
 import psycopg2
@@ -26,23 +27,29 @@ def get_urls():
     try:
         with cursor_ctx as (conn, cur):
             cur.execute("""
-                SELECT urls.id,
-                       urls.name,
-                       MAX(url_checks.created_at) AS last_check,
-                       MAX(url_checks.status_code) AS status_code
-                FROM urls
-                LEFT JOIN url_checks
-                  ON urls.id = url_checks.url_id
-                GROUP BY urls.id, urls.name
-                ORDER BY urls.id;
+                SELECT 
+                    u.id,
+                    u.name,
+                    uc.status_code,
+                    uc.created_at as last_check_date
+                FROM urls u
+                LEFT JOIN LATERAL (
+                    SELECT 
+                        status_code,
+                        created_at
+                    FROM url_checks
+                    WHERE url_id = u.id
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                ) uc ON true
+                ORDER BY u.id DESC
             """)
-            urls = cur.fetchall()
-            return urls
+            return cur.fetchall()
 
     except Exception as e:
         logger.exception(f"Error when getting the URL list: {e}")
         flash('Произошла ошибка при загрузке списка сайтов', 'danger')
-        return []
+    return []
 
 
 def get_url_detail(id):
@@ -123,43 +130,47 @@ def add_new_url(url):
     return url_id
 
 
-def check_urls(id):   
+def check_urls(url_id):
     """Функция проверки URL с транзакцией"""
     try:
         cursor_ctx = db.get_cursor()
-    except psycopg2.OperationalError:
-        logger.critical('Database connection error!')
-        flash('Ошибка подключения к базе данных', 'danger')
-        return redirect(url_for('index'))
+    except psycopg2.OperationalError as e:
+        logger.critical(f'Database connection error: {str(e)}')
+        return {'status': 'error', 'message': 'Ошибка подключения к базе данных'}
     
     try:
         with cursor_ctx as (conn, cur):
-            cur.execute("SELECT name FROM urls WHERE id = %s", (id,))
+            cur.execute("SELECT name FROM urls WHERE id = %s", (url_id,))
             url_record = cur.fetchone()
 
             if not url_record:
-                flash('Страница не найдена', 'danger')
-                return redirect(url_for('index'))
+                logger.warning(f"URL with id={url_id} not found")
+                return {'status': 'not_found', 'message': 'Страница не найдена'}
 
-            # Здесь логика проверки URL
-            _ = 200  # заглушка переменная status_code
+            url = url_record[0]
 
-            cur.execute("""
-                INSERT INTO url_checks (url_id, created_at)
-                VALUES (%s, %s)
-            """, (id, datetime.now()))
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()
+                status_code = response.status_code
+                
+                cur.execute("""
+                    INSERT INTO url_checks 
+                    (url_id, status_code, created_at)
+                    VALUES (%s, %s, %s)
+                """, (url_id, status_code, datetime.now()))
+                
+                logger.info(f"Verification for URL {url_id} saved successfully")
+                return {'status': 'success'}
+            
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request error to {url}: {str(e)}")
+                return {'status': 'error', 'message': 'Произошла ошибка при проверке'}
 
-            flash('Страница успешно проверена', 'success')
-
-        return redirect(url_for('url_detail', id=id))
-
-    except psycopg2.OperationalError:
-        flash('Ошибка подключения к базе данных', 'danger')
     except Exception as e:
-        logger.exception(e)
-        flash('Ошибка при проверке страницы', 'danger')
-
-    return redirect(url_for('url_detail', id=id))
+        logger.exception(f"DB error when checking the URL: {str(e)}")
+        if 'conn' in locals():
+            return {'status': 'error', 'message': 'Внутренняя ошибка сервера'}
 
 
 def validator(url):

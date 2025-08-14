@@ -1,40 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="mb-4">Сайты</h1>
-
-<table class="table table-bordered table-hover">
-    <thead class="table-light">
-        <tr>
-            <th>ID</th>
-            <th>Имя</th>
-            <th>Последняя проверка</th>
-            <th>Код ответа</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for url in urls %}
-        <tr>
-            <td>{{ url.id }}</td>
-            <td>
-                <a href="{{ url_for('url_detail', id=url.id) }}">{{ url.name }}</a>
-            </td>
-            <td>
-                {% if url.last_check %}
-                    {{ url.last_check.strftime('%Y-%m-%d') }}
-                {% else %}
-                    —
-                {% endif %}
-            </td>
-            <td>
-                {% if url.status_code %}
-                    {{ url.status_code }}
-                {% else %}
-                    —
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container-lg mt-3">
+    <h1 class="mb-4">Сайты</h1>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover" data-test="urls">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Последняя проверка</th>
+                    <th>Код ответа</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for url in urls %}
+                <tr>
+                    <td>{{ url.id }}</td>
+                    <td>
+                        <a href="{{ url_for('url_detail', id=url.id) }}">{{ url.name }}</a>
+                    </td>
+                    <td>
+                        {% if url.last_check_date %}
+                            {{ url.last_check_date.strftime('%Y-%m-%d') }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if url.status_code %}
+                            {{ url.status_code }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

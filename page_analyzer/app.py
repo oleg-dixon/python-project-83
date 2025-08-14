@@ -1,4 +1,3 @@
-import logging
 import os
 
 from dotenv import load_dotenv
@@ -13,8 +12,6 @@ from flask import (
 
 from page_analyzer import utils
 
-logger = logging.getLogger(__name__)
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -25,7 +22,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 @app.route('/', methods=['GET'])
 def index():
     """
-    Главная страница с формой добалвения URL
+    Обработчик для главной страницы с формой добалвения URL
     """
     logger.info('Home Page Request')
     return render_template(
@@ -35,14 +32,14 @@ def index():
 
 @app.route('/urls', methods=['GET'])
 def urls():
-    """Страница со списком всех URL"""
+    """Обработчик для вывода списка всех URL"""
     urls = utils.get_urls()
     return render_template('urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>')
 def url_detail(id):
-    """Страница с детальной информацией о URL"""
+    """Обработчик для детальной информацией о URL"""
     url_data = utils.get_url_detail(id)
     if not url_data:
         flash('Страница не найдена', 'danger')
@@ -54,7 +51,7 @@ def url_detail(id):
 
 @app.route('/add', methods=['POST'])
 def add_url():
-    """Страница с добавленим URL"""
+    """Обработчик добавления URL"""
     url = request.form.get('url', '').strip()
     logger.info(f"Попытка добавления URL: {url}")
     
@@ -78,8 +75,17 @@ def add_url():
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
-    utils.check_urls(id)
-    logger.info(f"Запуск проверки для URL id={id}")
+    """Обработчик проверки URL"""
+    result = utils.check_urls(id)
+    
+    if result['status'] == 'success':
+        flash('Страница успешно проверена', 'success')
+    elif result['status'] == 'not_found':
+        flash(result['message'], 'danger')
+        return redirect(url_for('index'))
+    else:
+        flash(result.get('message', 'Произошла ошибка при проверке'), 'danger')
+    
     return redirect(url_for('url_detail', id=id))
 
 
@@ -89,9 +95,3 @@ def format_datetime(value, format='%Y-%m-%d'):
     if value is None:
         return ''
     return value.strftime(format)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
