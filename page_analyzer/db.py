@@ -1,10 +1,10 @@
-import logging
 import os
 from contextlib import contextmanager
 
 import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import DictCursor
+
 from page_analyzer.logger import setup_logging
 
 logger = setup_logging()
@@ -15,6 +15,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 @contextmanager
 def get_cursor():
+    """Функция подключения к БД"""
     conn = None
     try:
         conn = psycopg2.connect(DATABASE_URL)

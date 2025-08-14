@@ -1,15 +1,15 @@
-import logging
-import requests
 from datetime import datetime
-from bs4 import BeautifulSoup
 
 import psycopg2
+import requests
+from bs4 import BeautifulSoup
 from flask import (
     flash,
     redirect,
     url_for,
 )
 from validators.url import url as is_url
+
 from page_analyzer import db
 from page_analyzer.logger import setup_logging
 
@@ -40,7 +40,7 @@ def get_urls():
                         created_at
                     FROM url_checks
                     WHERE url_id = u.id
-                    ORDER BY created_at ASC
+                    ORDER BY created_at DESC, status_code DESC
                     LIMIT 1
                 ) uc ON true
                 ORDER BY u.id ASC
@@ -143,7 +143,10 @@ def check_urls(url_id):
         cursor_ctx = db.get_cursor()
     except psycopg2.OperationalError as e:
         logger.critical(f'Database connection error: {str(e)}')
-        return {'status': 'error', 'message': 'Ошибка подключения к базе данных'}
+        return {
+            'status': 'error',
+            'message': 'Ошибка подключения к базе данных'
+        }
     
     try:
         with cursor_ctx as (conn, cur):
@@ -168,7 +171,6 @@ def check_urls(url_id):
                     title_tag_text = title_tag.get_text(strip=True)
                 else:
                     logger.warning("The <title> tag was not found on the URL")
-                    flash('Тег <title> не найден на странице')
                     title_tag_text = None
 
                 h1_tag = soup.find("h1")
@@ -176,7 +178,6 @@ def check_urls(url_id):
                     h1_tag_text = h1_tag.get_text(strip=True)
                 else:
                     logger.warning("The <h1> tag was not found on the URL")
-                    flash('Тег <h1> не найден на странице')
                     h1_tag_text = None
 
                 meta_tag = soup.find('meta', attrs={"name": "description"})
@@ -184,10 +185,9 @@ def check_urls(url_id):
                     content = meta_tag.get('content')
                 else:
                     logger.warning(
-                        f"The <meta> tag with 'name=description'" 
-                        f"was not found on the URL"
+                        "The <meta> tag with 'name=description'" 
+                        "was not found on the URL"
                     )
-                    flash("Тег <meta> с 'name=description' не найден на странице")
                     content = None
 
                 cur.execute("""
@@ -213,7 +213,10 @@ def check_urls(url_id):
             
             except requests.exceptions.RequestException as e:
                 logger.error(f"Request error to {url}: {str(e)}")
-                return {'status': 'error', 'message': 'Произошла ошибка при проверке'}
+                return {
+                    'status': 'error',
+                    'message': 'Произошла ошибка при проверке'
+                }
 
     except Exception as e:
         logger.exception(f"DB error when checking the URL: {str(e)}")
@@ -223,19 +226,19 @@ def check_urls(url_id):
 
 def validator(url):
     if not url:
-        logger.warning("Пустой URL")
+        logger.warning("Empty URL")
         return {'valid': False, 'message': 'URL не может быть пустым'}
     
     if len(url) > 255:
-        logger.warning(f"Слишком длинный URL: {url}")
+        logger.warning(f"The URL is too long: {url}")
         return {'valid': False, 'message': 'URL превышает 255 символов'}
     
     try:
         if not is_url(url):
-            logger.warning(f"Некорректный URL: {url}")
+            logger.warning(f"Invalid URL: {url}")
             return {'valid': False, 'message': 'Некорректный URL'}
     except Exception as e:
-        logger.error(f"Ошибка при валидации URL: {str(e)}")
+        logger.error(f"Error during URL validation: {str(e)}")
         return None
     
     normalized_url = url.lower().strip()

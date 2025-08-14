@@ -1,5 +1,4 @@
 import os
-import logging
 
 from dotenv import load_dotenv
 from flask import (
@@ -59,9 +58,9 @@ def url_detail(id):
 
 @app.route('/add', methods=['POST'])
 def add_url():
-    """Обработчик добавления URL"""
+    """Обработчик добавления URL с валидацией"""
     url = request.form.get('url', '').strip()
-    logger.info(f"Попытка добавления URL: {url}")
+    logger.info(f"An attempt to add a URL: {url}")
     
     validation_result = utils.validator(url)
     if validation_result is None or not validation_result.get('valid'):
@@ -98,7 +97,7 @@ def check_url(id):
 
 
 @app.template_filter('strftime')
-def format_datetime(value, format='%Y-%m-%d'):
+def format_datetime(value, format='%d-%m-%Y'):
     """Фильтр для форматирования даты в шаблонах"""
     if value is None:
         return ''

@@ -1,13 +1,14 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
+
 def setup_logging():
     """
-    Настройка базовой конфигурации логирования 
+    Функция настройки базовой конфигурации логирования 
     для всего проекта
     """
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s\n%(exc_info)s',
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
@@ -24,7 +25,8 @@ def setup_logging():
     root_logger.setLevel(logging.DEBUG)
 
     if not any(
-        isinstance(h, RotatingFileHandler) and h.baseFilename == file_handler.baseFilename
+        isinstance(h, RotatingFileHandler)
+        and h.baseFilename == file_handler.baseFilename
         for h in root_logger.handlers
     ):
         root_logger.addHandler(file_handler)

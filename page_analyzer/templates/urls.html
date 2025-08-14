@@ -23,7 +23,7 @@
                     </td>
                     <td>
                         {% if url.last_check_date %}
-                            {{ url.last_check_date.strftime('%Y-%m-%d') }}
+                            {{ url.last_check_date.strftime('%d-%m-%Y') }}
                         {% else %}
                             —
                         {% endif %}
