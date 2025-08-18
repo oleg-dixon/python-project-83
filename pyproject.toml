@@ -10,12 +10,12 @@ dependencies = [
     "gunicorn>=23.0.0",
     "python-dotenv>=1.1.1",
     "black>=25.1.0",
-    "psycopg2>=2.9.10",
     "bs4>=0.0.2",
     "requests>=2.32.4",
     "validators>=0.35.0",
     "bootstrap-flask>=2.5.0",
     "logging>=0.4.9.6",
     "lxml>=6.0.0",
+    "psycopg2-binary>=2.9.10",
 ]
 
