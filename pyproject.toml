@@ -17,5 +17,6 @@ dependencies = [
     "logging>=0.4.9.6",
     "lxml>=6.0.0",
     "psycopg2-binary>=2.9.10",
+    "psycopg2>=2.9.10",
 ]
 
