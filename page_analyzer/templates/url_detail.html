@@ -8,7 +8,7 @@
         <h1 class="mb-4">Сайт: {{ url.name }}</h1>
 
         <div class="table-responsive">
-            <table class="table table-bordered table-hover mb-4">
+            <table class="table table-bordered table-hover text-nowrap">
                 <tbody>
                     <tr>
                         <th style="width: 20%">ID</th>
@@ -27,12 +27,12 @@
         </div>
 
         <form action="{{ url_for('check_url', id=url.id) }}" method="post" class="mb-4">
-            <button type="submit" class="btn btn-primary">Запустить проверку</button>
+            <input type="submit" class="btn btn-primary" value="Запустить проверку">
         </form>
 
         <h2 class="mb-3">Проверки</h2>
         <div class="table-responsive">
-            <table class="table table-bordered table-hover" data-test="checks">
+            <table class="table table-bordered table-hover mt-2" data-test="checks">
                 <thead>
                     <tr>
                         <th style="width: 10%">ID</th>

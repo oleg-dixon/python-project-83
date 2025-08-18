@@ -47,7 +47,7 @@ def get_urls():
             """)
             return cur.fetchall()
 
-    except Exception as e:
+    except Exception as e: # Указать конкртеный тип ошибки!!!
         logger.exception(f"Error when getting the URL list: {e}")
         flash('Произошла ошибка при загрузке списка сайтов', 'danger')
     return []
@@ -90,7 +90,7 @@ def get_url_detail(id):
                 
     except psycopg2.OperationalError as e:
         logger.critical(f'Database connection error: {str(e)}')
-    except Exception as e:
+    except Exception as e: # Указать конкртеный тип ошибки!!!
         logger.exception(f"Error processing URL id={id}: {str(e)}")
     
     return None
@@ -129,7 +129,7 @@ def add_new_url(url):
                 logger.info(f"URL successfully added, id={url_id}")
                 flash('Страница успешно добавлена!', 'success')
            
-    except Exception as e:
+    except Exception as e: # Указать конкртеный тип ошибки!!!
         logger.exception(f"Error when working with the database: {str(e)}")
         flash('Произошла ошибка при добавлении URL', 'danger')
         return redirect(url_for('index'))
@@ -159,14 +159,14 @@ def check_urls(url_id):
 
             url = url_record[0]
 
-            try:
+            try: # Подумать над тем где нужны блоки try а где нет!!!
                 response = requests.get(url, timeout=10)
                 response.raise_for_status()
                 status_code = response.status_code
                 
                 soup = BeautifulSoup(response.text, features='lxml')
 
-                title_tag = soup.find('title')
+                title_tag = soup.find('title') # Подумать как строки 170 - 190 перенести в отдельную функцию а здесь сделать итерацию
                 if title_tag and title_tag.get_text(strip=True):
                     title_tag_text = title_tag.get_text(strip=True)
                 else:
@@ -218,7 +218,7 @@ def check_urls(url_id):
                     'message': 'Произошла ошибка при проверке'
                 }
 
-    except Exception as e:
+    except Exception as e: # Указать конкртеный тип ошибки!!!
         logger.exception(f"DB error when checking the URL: {str(e)}")
         if 'conn' in locals():
             return {'status': 'error', 'message': 'Внутренняя ошибка сервера'}
@@ -237,7 +237,7 @@ def validator(url):
         if not is_url(url):
             logger.warning(f"Invalid URL: {url}")
             return {'valid': False, 'message': 'Некорректный URL'}
-    except Exception as e:
+    except Exception as e: # Указать конкртеный тип ошибки!!!
         logger.error(f"Error during URL validation: {str(e)}")
         return None
     

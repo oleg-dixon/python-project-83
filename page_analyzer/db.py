@@ -25,7 +25,7 @@ def get_cursor():
             try:
                 yield conn, cur
                 conn.commit()
-            except Exception:
+            except Exception as e: # Указать какая именно ошибка должна выводится psycopg2 типа OperationalError!!!
                 conn.rollback()
                 raise
 
