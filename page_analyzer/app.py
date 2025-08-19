@@ -8,9 +8,19 @@ from flask import (
     url_for,
 )
 
-from page_analyzer import utils
-from page_analyzer.logger import setup_logging
-from page_analyzer.config import secret_key
+from page_analyzer.utils.utils import (
+    get_urls,
+    get_url_detail,
+    add_new_url,
+    check_urls,
+)
+from page_analyzer.utils.validators import (
+    get_normalized_url,
+    validator,
+    get_domain_from_url
+)
+from page_analyzer.utils.logger import setup_logging
+from page_analyzer.utils.config import secret_key
 
 logger = setup_logging()
 
@@ -33,14 +43,14 @@ def index():
 @app.route('/urls', methods=['GET'])
 def urls():
     """Обработчик для вывода списка всех URL"""
-    urls = utils.get_urls()
+    urls = get_urls()
     return render_template('urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>')
 def url_detail(id):
     """Обработчик для детальной информации о URL"""
-    url_data = utils.get_url_detail(id)
+    url_data = get_url_detail(id)
     if not url_data:
         flash('Страница не найдена', 'danger')
         return redirect(url_for('index'))
@@ -56,10 +66,12 @@ def url_detail(id):
 @app.route('/add', methods=['POST'])
 def add_url():
     """Обработчик добавления URL с валидацией"""
-    url = request.form.get('url', '').strip()
-    logger.info(f"An attempt to add a URL: {url}")
+    url = request.form.get('url', '')
+    url_normalize = get_normalized_url(url)
+    url_domain = get_domain_from_url(url_normalize)
+    logger.info(f"An attempt to add a URL: {url_domain}")
     
-    validation_result = utils.validator(url)
+    validation_result = validator(url_domain)
     if validation_result is None or not validation_result.get('valid'):
         message = (
         validation_result.get('message', 'Некорректный URL')
@@ -69,7 +81,7 @@ def add_url():
         flash(message, 'danger')
         return redirect(url_for('index'))
     
-    url_id = utils.add_new_url(validation_result['url'])
+    url_id = add_new_url(validation_result['url'])
     if url_id is None:
         flash('Произошла ошибка при добавлении URL', 'danger')
         return redirect(url_for('index'))
@@ -80,7 +92,7 @@ def add_url():
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     """Обработчик проверки URL"""
-    result = utils.check_urls(id)
+    result = check_urls(id)
     
     if result['status'] == 'success':
         flash('Страница успешно проверена', 'success')

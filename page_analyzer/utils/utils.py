@@ -8,10 +8,10 @@ from flask import (
     redirect,
     url_for,
 )
-from validators.url import url as is_url
 
-from page_analyzer import db
-from page_analyzer.logger import setup_logging
+from page_analyzer.utils import db
+from page_analyzer.utils.logger import setup_logging
+
 
 logger = setup_logging()
 
@@ -47,7 +47,7 @@ def get_urls():
             """)
             return cur.fetchall()
 
-    except Exception as e: # Указать конкртеный тип ошибки!!!
+    except psycopg2.OperationalError as e:
         logger.exception(f"Error when getting the URL list: {e}")
         flash('Произошла ошибка при загрузке списка сайтов', 'danger')
     return []
@@ -89,8 +89,6 @@ def get_url_detail(id):
             return url, checks
                 
     except psycopg2.OperationalError as e:
-        logger.critical(f'Database connection error: {str(e)}')
-    except Exception as e: # Указать конкртеный тип ошибки!!!
         logger.exception(f"Error processing URL id={id}: {str(e)}")
     
     return None
@@ -129,7 +127,7 @@ def add_new_url(url):
                 logger.info(f"URL successfully added, id={url_id}")
                 flash('Страница успешно добавлена!', 'success')
            
-    except Exception as e: # Указать конкртеный тип ошибки!!!
+    except psycopg2.OperationalError as e:
         logger.exception(f"Error when working with the database: {str(e)}")
         flash('Произошла ошибка при добавлении URL', 'danger')
         return redirect(url_for('index'))
@@ -218,28 +216,7 @@ def check_urls(url_id):
                     'message': 'Произошла ошибка при проверке'
                 }
 
-    except Exception as e: # Указать конкртеный тип ошибки!!!
+    except psycopg2.OperationalError as e:
         logger.exception(f"DB error when checking the URL: {str(e)}")
         if 'conn' in locals():
             return {'status': 'error', 'message': 'Внутренняя ошибка сервера'}
-
-
-def validator(url):
-    if not url:
-        logger.warning("Empty URL")
-        return {'valid': False, 'message': 'URL не может быть пустым'}
-    
-    if len(url) > 255:
-        logger.warning(f"The URL is too long: {url}")
-        return {'valid': False, 'message': 'URL превышает 255 символов'}
-    
-    try:
-        if not is_url(url):
-            logger.warning(f"Invalid URL: {url}")
-            return {'valid': False, 'message': 'Некорректный URL'}
-    except (ValueError, AttributeError, TypeError) as e:
-        logger.error(f"Error during URL validation: {str(e)}")
-        return None
-    
-    normalized_url = url.lower().strip()
-    return {'valid': True, 'url': normalized_url, 'message': ''}
