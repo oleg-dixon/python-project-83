@@ -43,7 +43,7 @@ def get_urls():
                     ORDER BY created_at DESC, status_code DESC
                     LIMIT 1
                 ) uc ON true
-                ORDER BY u.id ASC
+                ORDER BY u.id DESC
             """)
             return cur.fetchall()
 
@@ -237,7 +237,7 @@ def validator(url):
         if not is_url(url):
             logger.warning(f"Invalid URL: {url}")
             return {'valid': False, 'message': 'Некорректный URL'}
-    except Exception as e: # Указать конкртеный тип ошибки!!!
+    except (ValueError, AttributeError, TypeError) as e:
         logger.error(f"Error during URL validation: {str(e)}")
         return None
     

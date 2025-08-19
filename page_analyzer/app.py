@@ -1,5 +1,3 @@
-import os
-
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -12,14 +10,13 @@ from flask import (
 
 from page_analyzer import utils
 from page_analyzer.logger import setup_logging
+from page_analyzer.config import secret_key
 
 logger = setup_logging()
 
-load_dotenv()
-
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = secret_key()
 
 
 @app.route('/', methods=['GET'])
@@ -97,7 +94,7 @@ def check_url(id):
 
 
 @app.template_filter('strftime')
-def format_datetime(value, format='%d-%m-%Y'):
+def format_datetime(value, format='%Y-%m-%d'):
     """Фильтр для форматирования даты в шаблонах"""
     if value is None:
         return ''
