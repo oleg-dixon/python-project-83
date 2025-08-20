@@ -1,12 +1,17 @@
-from validators.url import url as is_url
 from urllib.parse import urlparse
+
+from validators.url import url as is_url
+
 from page_analyzer.utils.logger import setup_logging
 
 logger = setup_logging()
 
 
 def get_normalized_url(url):
-    """Функция для нормализации URL"""
+    """
+    Функция для нормализации
+    введеного пользователем URL
+    """
     normalized_url = url.lower().strip()
     return normalized_url
 

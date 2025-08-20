@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from flask import (
     Flask,
     flash,
@@ -8,19 +7,19 @@ from flask import (
     url_for,
 )
 
+from page_analyzer.utils.config import secret_key
+from page_analyzer.utils.logger import setup_logging
 from page_analyzer.utils.utils import (
-    get_urls,
-    get_url_detail,
     add_new_url,
     check_urls,
+    get_url_detail,
+    get_urls,
 )
 from page_analyzer.utils.validators import (
+    get_domain_from_url,
     get_normalized_url,
     validator,
-    get_domain_from_url
 )
-from page_analyzer.utils.logger import setup_logging
-from page_analyzer.utils.config import secret_key
 
 logger = setup_logging()
 

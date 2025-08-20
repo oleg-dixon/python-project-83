@@ -3,8 +3,8 @@ from contextlib import contextmanager
 import psycopg2
 from psycopg2.extras import DictCursor
 
-from page_analyzer.utils.logger import setup_logging
 from page_analyzer.utils.config import database_url
+from page_analyzer.utils.logger import setup_logging
 
 logger = setup_logging()
 
@@ -23,7 +23,7 @@ def get_cursor():
             try:
                 yield conn, cur
                 conn.commit()
-            except psycopg2.OperationalError as e:
+            except psycopg2.OperationalError:
                 conn.rollback()
                 raise
 
