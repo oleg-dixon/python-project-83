@@ -76,7 +76,7 @@ def add_url():
             else 'Ошибка валидации URL'
         )
         flash(message, 'danger')
-        return render_template('index.html', last_url=url)
+        return render_template('index.html', last_url=url), 422
     
     validated_normalized_url = validation_result['url']
     
