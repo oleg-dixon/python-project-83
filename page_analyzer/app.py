@@ -62,7 +62,7 @@ def url_detail(id):
         )
     
 
-@app.route('/add', methods=['POST'])
+@app.route('/url', methods=['POST'])
 def add_url():
     """Обработчик добавления URL с валидацией"""
     url = request.form.get('url', '').strip()
@@ -88,7 +88,7 @@ def add_url():
     url_id = add_new_url(url_domain)
     if url_id is None:
         flash('Произошла ошибка при добавлении URL', 'danger')
-        return redirect('index.html', last_url=urls)
+        return redirect('index.html', last_url=url)
     
     return redirect(url_for('url_detail', id=url_id))
 
