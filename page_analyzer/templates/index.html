@@ -9,8 +9,12 @@
         <form action="{{ url_for('add_url') }}" method="post">
             <div class="row g-2">
                 <div class="col-md-8">
-                    <input type="text" name="url" class="form-control form-control-lg" 
-                           placeholder="https://www.example.com" required>
+                    <input type="text" 
+                           name="url" 
+                           placeholder="https://www.example.com"
+                           value="{{ last_url }}"
+                           class="form-control form-control-lg" 
+                           required>
                 </div>
                 <div class="col-md-4">
                     <input type="submit" class="btn btn-primary" value="ПРОВЕРИТЬ">

@@ -5,6 +5,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    session,
 )
 
 from page_analyzer.utils.config import secret_key
@@ -35,7 +36,8 @@ def index():
     """
     logger.info('Home Page Request')
     return render_template(
-        'index.html',
+        'index.html', 
+        last_url=request.args.get('last_url', '')
     )
 
 
@@ -65,25 +67,28 @@ def url_detail(id):
 @app.route('/add', methods=['POST'])
 def add_url():
     """Обработчик добавления URL с валидацией"""
-    url = request.form.get('url', '')
-    url_normalize = get_normalized_url(url)
-    url_domain = get_domain_from_url(url_normalize)
-    logger.info(f"An attempt to add a URL: {url_domain}")
+    url = request.form.get('url', '').strip()
+    logger.info(f"An attempt to add a URL: {url}")
     
-    validation_result = validator(url_domain)
+    validation_result = validator(url)
     if validation_result is None or not validation_result.get('valid'):
         message = (
-        validation_result.get('message', 'Некорректный URL')
-        if validation_result
-        else 'Ошибка валидации URL'
+            validation_result.get('message', 'Некорректный URL')
+            if validation_result
+            else 'Ошибка валидации URL'
         )
         flash(message, 'danger')
-        return redirect(url_for('index'))
+        return render_template('index.html', last_url=url)
     
-    url_id = add_new_url(validation_result['url'])
+    validated_normalized_url = validation_result['url']
+    
+    url_domain = get_domain_from_url(validated_normalized_url)
+    logger.info(f"Validated URL: {validated_normalized_url}, Domain: {url_domain}")
+    
+    url_id = add_new_url(url_domain)
     if url_id is None:
         flash('Произошла ошибка при добавлении URL', 'danger')
-        return redirect(url_for('index'))
+        return render_template('index.html', last_url=url)
     
     return redirect(url_for('url_detail', id=url_id))
 
