@@ -1,40 +1,29 @@
 {% extends 'base.html' %}
 
+{% block title %}Сайты{% endblock %}
+
 {% block content %}
-<div class="container-lg mt-3">
-    <h1 class="mb-4">Сайты</h1>
-    
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover" data-test="urls">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Имя</th>
-                    <th>Последняя проверка</th>
-                    <th>Код ответа</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for url in urls %}
-                <tr>
-                    <td>{{ url.id }}</td>
-                    <td>
-                        <a href="{{ url_for('url_detail', id=url.id) }}">{{ url.name }}</a>
-                    </td>
-                    <td>
-                        {% if url.last_check_date %}
-                            {{ url.last_check_date.strftime('%Y-%m-%d') }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if url.status_code %}
-                            {{ url.status_code }}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<h1 class="h3 mb-4">Сайты</h1>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover" data-test="urls">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Последняя проверка</th>
+            <th>Код ответа</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for url in urls %}
+        <tr>
+            <td>{{ url.id }}</td>
+            <td><a href="{{ url_for('url_detail', id=url.id) }}">{{ url.name }}</a></td>
+            <td>{% if url.last_check_date %}{{ url.last_check_date.strftime('%Y-%m-%d') }}{% endif %}</td>
+            <td>{% if url.status_code %}{{ url.status_code }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

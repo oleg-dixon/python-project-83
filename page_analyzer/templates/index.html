@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
 
+{% block title %}Анализатор страниц{% endblock %}
+
 {% block content %}
-<div class="card">
+<div class="card shadow-sm">
     <div class="card-body">
-        <h1 class="page-header">Анализатор страниц</h1>
-        <p class="page-subheader">Бесплатно проверяйте сайты на SEO-пригодность</p>
-        
+        <h1 class="display-3">Анализатор страниц</h1>
+        <p class="lead">Бесплатно проверяйте сайты на SEO-пригодность</p>
+
         <form action="{{ url_for('add_url') }}" method="post">
             <div class="row g-2">
                 <div class="col-md-8">
-                    <input type="text" 
-                           name="url" 
+                    <input type="text"
+                           name="url"
                            placeholder="https://www.example.com"
                            value="{{ last_url }}"
-                           class="form-control form-control-lg" 
+                           class="form-control form-control-lg"
                            required>
                 </div>
-                <div class="col-md-4">
-                    <input type="submit" class="btn btn-primary" value="ПРОВЕРИТЬ">
+                <div class="col-md-4 d-grid">
+                    <input type="submit" class="btn btn-primary btn-lg" value="ПРОВЕРИТЬ">
                 </div>
             </div>
         </form>
