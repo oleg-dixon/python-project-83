@@ -88,7 +88,7 @@ def add_url():
     url_id = add_new_url(url_domain)
     if url_id is None:
         flash('Произошла ошибка при добавлении URL', 'danger')
-        return render_template('index.html', last_url=url)
+        return redirect('index.html', last_url=url)
     
     return redirect(url_for('url_detail', id=url_id))
 
