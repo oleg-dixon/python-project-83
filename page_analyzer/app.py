@@ -99,7 +99,12 @@ def check_url(id):
         flash(result['message'], 'danger')
         return redirect(url_for('index'))
     else:
-        flash(result.get('message', 'Произошла ошибка при проверке'), 'danger')
+        flash(
+            result.get(
+                'message',
+                'Произошла ошибка при проверке! Сервер не отвечает!'
+            ), 'danger'
+        )
     
     return redirect(url_for('url_detail', id=id))
 

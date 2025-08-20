@@ -1,8 +1,7 @@
 from datetime import datetime
 
 import psycopg2
-
-
+import requests
 from flask import (
     flash,
     redirect,
@@ -11,6 +10,12 @@ from flask import (
 
 from page_analyzer.utils import db
 from page_analyzer.utils.logger import setup_logging
+from page_analyzer.utils.parsers import (
+    get_h1_tag,
+    get_meta_tag,
+    get_status_code,
+    get_title_tag,
+)
 
 logger = setup_logging()
 
@@ -135,7 +140,7 @@ def add_new_url(url):
 
 
 def check_urls(url_id):
-    """Функция проверки URL с транзакцией"""
+    """Функция проверки URL с транзакцией в БД"""
     try:
         cursor_ctx = db.get_cursor()
     except psycopg2.OperationalError as e:
@@ -156,11 +161,12 @@ def check_urls(url_id):
 
             url = url_record[0]
 
-            try:  
-                # ПОЛУЧЕНИЕ КОДА ОТВЕТА
-
-                
-                
+            try:
+                response = requests.get(url, timeout=10)
+                status_code = get_status_code(response)
+                h1_tag_text = get_h1_tag(response)
+                title_tag_text = get_title_tag(response)
+                description = get_meta_tag(response)
 
                 cur.execute("""
                     INSERT INTO url_checks 
@@ -176,7 +182,7 @@ def check_urls(url_id):
                     status_code,
                     h1_tag_text,
                     title_tag_text,
-                    content,
+                    description,
                     datetime.now())
                 )
                 
@@ -187,7 +193,10 @@ def check_urls(url_id):
                 logger.error(f"Request error to {url}: {str(e)}")
                 return {
                     'status': 'error',
-                    'message': 'Произошла ошибка при проверке'
+                    'message': (
+                        'Произошла ошибка при проверке! '
+                        'Сервер не отвечает!'
+                    )
                 }
 
     except psycopg2.OperationalError as e:
