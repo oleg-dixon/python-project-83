@@ -5,7 +5,6 @@ from flask import (
     render_template,
     request,
     url_for,
-    session,
 )
 
 from page_analyzer.utils.config import secret_key
@@ -18,7 +17,6 @@ from page_analyzer.utils.utils import (
 )
 from page_analyzer.utils.validators import (
     get_domain_from_url,
-    get_normalized_url,
     validator,
 )
 
@@ -83,7 +81,9 @@ def add_url():
     validated_normalized_url = validation_result['url']
     
     url_domain = get_domain_from_url(validated_normalized_url)
-    logger.info(f"Validated URL: {validated_normalized_url}, Domain: {url_domain}")
+    logger.info(
+        f"Validated URL: {validated_normalized_url}, Domain: {url_domain}"
+    )
     
     url_id = add_new_url(url_domain)
     if url_id is None:
